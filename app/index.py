@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from routers import module_filter_router
+from .routers import module_filter_router, object_relation_router
 
 
 app = FastAPI(
@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(module_filter_router.router)
+app.include_router(object_relation_router.router)
 
 @app.get("/api/data")
 def get_sample_data():
@@ -53,8 +54,7 @@ def read_root():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vercel + FastAPI</title>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <title>Knowledge Graph Query Backend</title>
         <style>
             * {
                 margin: 0;
@@ -314,7 +314,6 @@ def read_root():
     <body>
         <header>
             <nav>
-                <a href="/" class="logo">Vercel + FastAPI</a>
                 <div class="nav-links">
                     <a href="/docs">API Docs</a>
                     <a href="/api/data">API</a>
@@ -323,7 +322,7 @@ def read_root():
         </header>
         <main>
             <div class="hero">
-                <h1>Vercel + FastAPI</h1>
+                <h1>Knowledge Graph Query Backend</h1>
                 <div class="hero-code">
                     <pre><code><span class="keyword">from</span> <span class="module">fastapi</span> <span class="keyword">import</span> <span class="class">FastAPI</span>
 
@@ -357,4 +356,4 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("index:app", host="0.0.0.0", port=5001, reload=True)
+    uvicorn.run("app.index:app", host="0.0.0.0", port=5001, reload=True)

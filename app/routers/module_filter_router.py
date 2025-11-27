@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from models.module_filter import ModuleFilterRequest, ModuleFilterResponse, ModuleItem
-from services import module_filter
+from ..models.module_filter import ModuleFilterRequest, ModuleFilterResponse, ModuleItem
+from ..services import module_filter
 
 router = APIRouter(prefix="/api/module-filter", tags=["module-filter"])
 
