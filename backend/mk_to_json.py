@@ -568,8 +568,8 @@ def catalog_to_json(
         json.dump(plain, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    pdf = Path("data/module_catalogs/mmds.pdf")
-    out = Path("data/preprocessed/test.json")
+    pdf = Path("app/data/module_catalogs/wima_bachelor.pdf")
+    out = Path("app/data/preprocessed/wima_bachelor.json")
 
     overview_pages = ""
 

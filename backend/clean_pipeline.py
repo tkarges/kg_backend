@@ -4,7 +4,7 @@ import numpy as np
 import re
 
 def clean_main():
-    base_path = 'data/preprocessed/'
+    base_path = 'app/data/preprocessed/'
 
     json_file_path_mmds_master = base_path + 'mmds.json'
     json_file_path_wifo_bachelor = base_path + 'wifo_bachelor.json'
@@ -35,11 +35,13 @@ def clean_main():
     
 
     for i, df in enumerate(dfs):
+        print(df.info())
         #df['moduleno'] = df['moduleno'].astype(str)
         #df['moduleno'] = df['moduleno'].apply(remove_whitespaces)
         #df['lecturer'] = df['lecturer'].apply(remove_whitespaces)
         #df['range_of_application'] = df['range_of_application'].apply(remove_whitespaces)
         
+        df["ects"] = pd.to_numeric(df["ects"], errors="coerce").astype("Int64")
         df['type_of_module'] = df['type_of_module'].apply(clean_type_of_module)
         df['form_of_module'] = df['form_of_module'].apply(clean_form_of_module)
         df['level'] = df['level'].apply(clean_level)
@@ -52,7 +54,8 @@ def clean_main():
         df['range_of_application'] = df['range_of_application'].apply(standardize_range_of_application)
         df['semester'] = df['semester'].apply(clean_semester)
         for col in df.columns:
-            df[col] = df[col].apply(process_string)
+            if col != 'ects':
+                df[col] = df[col].apply(process_string)
 
         df = df.rename(
             columns={
