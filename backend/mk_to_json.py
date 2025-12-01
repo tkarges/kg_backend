@@ -568,10 +568,13 @@ def catalog_to_json(
         json.dump(plain, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    pdf = Path("data/module_catalogs/mmds.pdf")
-    out = Path("data/preprocessed/test.json")
+    mks = ["mmds", "wifo_bachelor", "wifo_master", "wima_bachelor", "wima_master"]
+    for mk in mks:
+    
+        pdf = Path(f"data/module_catalogs/{mk}.pdf")
+        out = Path(f"data/preprocessed/{mk}.json")
 
-    overview_pages = ""
+        overview_pages = ""
 
-    catalog_to_json(pdf, out, overview_pages=overview_pages)
-    print(f"Wrote {out}")
+        catalog_to_json(pdf, out, overview_pages=overview_pages)
+        print(f"Wrote {out}")
