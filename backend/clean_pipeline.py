@@ -101,7 +101,7 @@ def clean_form_of_module(text):
             unique_found_terms.append(item)
 
     if unique_found_terms:
-        return '; '.join(unique_found_terms)
+        return ';'.join(unique_found_terms)
     else:
         # If no keywords are found, return the original text (lowercased) as a fallback
         return text_lower
@@ -124,7 +124,7 @@ def clean_level(text):
     if 'master' in text_lower:
         found_terms.add('Master')
     if found_terms:
-        return '; '.join(sorted(list(found_terms)))
+        return ';'.join(sorted(list(found_terms)))
     else:
         return text_lower
   
@@ -173,7 +173,7 @@ def clean_form_of_assessment(text):
 
     # Convert set to list and sort for consistent output, then join
     if found_terms:
-        return '; '.join(sorted(list(found_terms)))
+        return ';'.join(sorted(list(found_terms)))
     else:
         # Fallback if no keywords are found, returning the original lowercased text
         return text_lower
@@ -191,7 +191,7 @@ def clean_admission_requirements(text):
         if 'participation' in text_str:
             found_terms.add('Participation')
         if found_terms:
-            return '; '.join(sorted(list(found_terms)))
+            return ';'.join(sorted(list(found_terms)))
         else:
         # Fallback if no keywords are found, returning the original lowercased text
             return text_str
@@ -213,7 +213,7 @@ def clean_language(text):
     if "english" or "englisch" in text_lower:
         found_terms.add("English")
     if found_terms:
-        return '; '.join(sorted(list(found_terms)))
+        return ';'.join(sorted(list(found_terms)))
     else:
         return text_lower
     
@@ -231,23 +231,23 @@ def clean_offering(text):
         found_terms.add('irregular')
 
     if found_terms:
-        return '; '.join(sorted(list(found_terms)))
+        return ';'.join(sorted(list(found_terms)))
     else:
         return text_lower
     
 def clean_further(df):
     for idx, further in df['further_modules'].items():
-        further_lower = str(further).lower()
+        further_lower = str(further).lower().strip()
         found_courses = set()
 
         for module in df['name']:
-            if str(module).lower() in further_lower:
+            if str(module).lower().replace('\n', '').replace('-', '').replace(' ', '') in further_lower.replace('\n', '').replace('-', '').replace(' ', ''):
                 found_courses.add(module)
 
         if found_courses:
-            df.at[idx, 'further_modules'] = '; '.join(sorted(found_courses))
+            df.at[idx, 'further_modules'] = ';'.join(sorted(found_courses))
         else:
-            df.at[idx, 'further_modules'] = further_lower
+            df.at[idx, 'further_modules'] = "none"
 
     return df
 
@@ -289,6 +289,6 @@ def clean_semester(text):
     if '4' in text_lower:
         found_sems.add('4')
     if found_sems:
-        return '; '.join(sorted(list(found_sems)))
+        return ';'.join(sorted(list(found_sems)))
     else:
         return text_lower
