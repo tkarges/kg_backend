@@ -168,19 +168,57 @@ def pdf_to_lines(pdf_path: str | Path) -> List[str]:
     return [l.rstrip("\n") for l in lines]
 
 
+def extract_module_name(lines: list[str], start_idx: int, n: int) -> tuple[str, int]:
+    """
+    Extract ONLY the first non-empty line after the module code as the name.
+    Also returns the index of the first heading after that.
+    """
+
+    # Step 1: find first non-empty name line
+    k = start_idx
+    while k < n and not lines[k].strip():
+        k += 1
+    if k >= n:
+        return "", None
+
+    # First name line
+    first_line = lines[k].strip()
+    first_line = first_line.rstrip(":").strip()   # remove trailing ":" or "::"
+
+    # Step 2: find first heading after this name
+    name_line_idx = k
+    k += 1
+
+    first_heading_idx = None
+    while k < n:
+        norm = normalize_heading(lines[k])
+        if norm in NORMALIZED_SECTION_KEYS:
+            first_heading_idx = k
+            break
+        k += 1
+
+    return first_line, first_heading_idx
+
+
+
 def is_module_header(lines, idx):
     n = len(lines)
     line = lines[idx].strip()
 
+    # --- CASE 1: Full header with code + title on same line ---
     m = MODULE_HEADER_WITH_TITLE_RE.match(line)
     if m:
         code = m.group(1).strip()
-        name = m.group(2).strip()
+        name_on_same_line = m.group(2).strip()
 
+        # Move to next non-empty line after this header
         k = idx + 1
         while k < n and not lines[k].strip():
             k += 1
 
+        # Extract name using the unified logic
+        # (but only if name wasn't already provided inline)
+        # For this pattern, name is known, so we skip to heading detection.
         first_heading_idx = None
         while k < n:
             norm = normalize_heading(lines[k])
@@ -192,18 +230,23 @@ def is_module_header(lines, idx):
         if first_heading_idx is None:
             return None
 
+        # Use inline title, clean trailing colon if present
+        name = name_on_same_line.rstrip(":").strip()
+
         return {
             "code": code,
             "name": name,
             "form_idx": first_heading_idx,
         }
 
+    # --- CASE 2: Header where code appears first, name appears in "Titel" line ---
     m = MODULNUMMER_RE.match(line)
     if m:
         code = m.group(2).strip()
-        name = None
 
+        # Find explicit Titel/Title line if present
         j = idx + 1
+        name = None
         while j < n:
             txt = lines[j].strip()
             if txt.startswith("Titel "):
@@ -214,15 +257,18 @@ def is_module_header(lines, idx):
                 break
             j += 1
 
+        # Fallback: maybe previous line has inline title
         if not name and idx > 0:
             prev = lines[idx - 1].strip()
             pm = MODULE_HEADER_WITH_TITLE_RE.match(prev)
             if pm:
                 name = pm.group(2).strip()
 
+        # Final fallback → use code as name
         if not name:
             name = code
 
+        # Now find first heading after this
         k = idx + 1
         while k < n and not lines[k].strip():
             k += 1
@@ -238,21 +284,27 @@ def is_module_header(lines, idx):
         if first_heading_idx is None:
             return None
 
+        # Clean name
+        name = name.rstrip(":").strip()
+
         return {
             "code": code,
             "name": name,
             "form_idx": first_heading_idx,
         }
 
+    # --- CASE 3: Code as a standalone line, name appears in the next line(s) ---
     if not MODULE_CODE_RE.match(line):
         return None
 
     code = line.strip()
 
+    # Find first non-empty line after code → start of name
     j = idx + 1
     while j < n and not lines[j].strip():
         j += 1
 
+    # Check: next line shouldn't be another code
     if j < n and MODULE_CODE_RE.match(lines[j].strip()):
         j += 1
         while j < n and not lines[j].strip():
@@ -261,22 +313,8 @@ def is_module_header(lines, idx):
     if j >= n:
         return None
 
-    name = lines[j].strip()
-    if not name:
-        return None
-
-    k = j + 1
-    while k < n and not lines[k].strip():
-        k += 1
-
-    first_heading_idx = None
-    while k < n:
-        norm = normalize_heading(lines[k])
-        if norm in NORMALIZED_SECTION_KEYS:
-            first_heading_idx = k
-            break
-        k += 1
-
+    # NEW LOGIC HERE ↓
+    name, first_heading_idx = extract_module_name(lines, j, n)
     if first_heading_idx is None:
         return None
 
@@ -568,10 +606,13 @@ def catalog_to_json(
         json.dump(plain, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    pdf = Path("app/data/module_catalogs/wima_bachelor.pdf")
-    out = Path("app/data/preprocessed/wima_bachelor.json")
+    mks = ["mmds", "wifo_bachelor", "wifo_master", "wima_bachelor", "wima_master"]
+    for mk in mks:
+    
+        pdf = Path(f"data/module_catalogs/{mk}.pdf")
+        out = Path(f"data/preprocessed/{mk}.json")
 
-    overview_pages = ""
+        overview_pages = ""
 
-    catalog_to_json(pdf, out, overview_pages=overview_pages)
-    print(f"Wrote {out}")
+        catalog_to_json(pdf, out, overview_pages=overview_pages)
+        print(f"Wrote {out}")
