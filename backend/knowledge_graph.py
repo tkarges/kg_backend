@@ -259,7 +259,6 @@ if __name__ == "__main__":
         vals = []
         for v in col.dropna():
             vals.extend(str(v).split(';'))
-        # unique, stripped, joined back
         return ';'.join(sorted(set(x.strip() for x in vals if x.strip())))
 
     results = (
@@ -280,7 +279,7 @@ if __name__ == "__main__":
             "offering": "first",
             "prerequisites": "first",
             "further_modules": "first",
-            "application_range": merge_semicolon,  # 👈 merge here
+            "application_range": merge_semicolon,
             "lecturer": "first",
             "person_in_charge": "first",
         })
@@ -290,4 +289,4 @@ if __name__ == "__main__":
     
     my_graph = kg_instance.graph
 
-    my_graph.serialize(destination='data/module_graph.ttl', format='turtle')
+    my_graph.serialize(destination='ap/data/module_graph.ttl', format='turtle')
