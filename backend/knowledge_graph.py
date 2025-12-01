@@ -289,4 +289,4 @@ if __name__ == "__main__":
     
     my_graph = kg_instance.graph
 
-    my_graph.serialize(destination='ap/data/module_graph.ttl', format='turtle')
+    my_graph.serialize(destination='app/data/module_graph.ttl', format='turtle')
